@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    // Send the request to OpenAI API
+    // Send the request to OpenAI API...
     const openaiResponse = await axios.post<OpenAIResponse>(
       'https://api.openai.com/v1/chat/completions',
       data,
