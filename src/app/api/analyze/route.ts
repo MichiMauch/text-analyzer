@@ -27,6 +27,9 @@ export async function POST(req: NextRequest) {
     const $ = cheerio.load(webpageHTML);
     const mainContent = $('.default').text();
     const pageTitle = $('title').text();
+    const ogImage = $('meta[property="og:image"]').attr('content');
+
+    console.log('Extracted og:image:', ogImage); // Log the extracted og:image URL
 
     // Truncate the text if it's too long (optional, based on your needs)
     const maxLength = 5000;
@@ -42,7 +45,13 @@ export async function POST(req: NextRequest) {
         },
         {
           role: 'user',
-          content: `Bitte analysieren Sie den folgenden Text hinsichtlich seiner Länge und Lesbarkeit. Bewerten Sie, ob die Textlänge angemessen ist oder ob der Text zu kurz oder zu lang erscheint. Beurteilen Sie außerdem, wie flüssig sich der Text lesen lässt. Berücksichtigen Sie dabei Aspekte wie Satzstruktur, Klarheit der Argumentation und die Verwendung von Fachsprache oder Jargon. Geben Sie die Bewertung auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet, am Anfang der Antwort an. Überprüfen Sie außerdem, ob die Keyphrase "${keyphrase}" im Text vorhanden ist und wie oft sie vorkommt. Geben Sie abschließend eine SEO-Bewertung basierend auf der Verwendung der Keyphrase und machen Sie Vorschläge, wie der Text verbessert werden kann: ${truncatedContent}`,
+          content: `Bitte analysieren Sie den folgenden Text hinsichtlich seiner Länge und Lesbarkeit. 
+                    Bewerten Sie, ob die Textlänge angemessen ist oder ob der Text zu kurz oder zu lang erscheint. Beurteilen Sie außerdem, wie flüssig sich der Text lesen lässt. Berücksichtigen Sie dabei Aspekte wie Satzstruktur, Klarheit der Argumentation und die Verwendung von Fachsprache oder Jargon. 
+                    Geben Sie die allgemeine Bewertung und die SEO-Bewertung am Anfang der Antwort in folgender Form: 
+                    "Bewertung: X, SEO-Bewertung: Y". 
+                    Überprüfen Sie außerdem, ob die Keyphrase "${keyphrase}" im Text vorhanden ist und wie oft sie vorkommt. 
+                    Machen Sie Vorschläge, wie der Text sowohl hinsichtlich der allgemeinen Bewertung als auch der SEO-Bewertung verbessert werden kann: ${truncatedContent}`,
+
         },
       ],
     };
@@ -78,7 +87,7 @@ export async function POST(req: NextRequest) {
     const suggestionsStart = analysis.indexOf("Vorschläge:");
     const suggestions = suggestionsStart !== -1 ? analysis.slice(suggestionsStart) : "";
 
-    return NextResponse.json({ analysis, rating: ratingValue, seoScore, suggestions, wordCount: truncatedContent.split(/\s+/).length, title: pageTitle });
+    return NextResponse.json({ analysis, rating: ratingValue, seoScore, suggestions, wordCount: truncatedContent.split(/\s+/).length, title: pageTitle, ogImage });
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error(error.response?.data || error.message);
