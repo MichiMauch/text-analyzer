@@ -75,7 +75,7 @@ export default function AnalysisForm() {
   };
 
   return (
-    <div className="bg-white h-screen p-4 mx-auto max-w-7xl">
+    <div className="bg-white min-h-screen p-4 mx-auto max-w-7xl">
       <div className="border bg-background rounded-xl my-4 p-4">
         <h1 className="text-3xl font-bold">Paul AI by MM</h1>
         <div className="border-t mt-4 pt-4">
