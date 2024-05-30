@@ -11,6 +11,7 @@ export default function AnalysisForm() {
   const [seoScore, setSeoScore] = useState<string | null>(null); // State for SEO score
   const [suggestions, setSuggestions] = useState(''); // State for improvement suggestions
   const [wordCount, setWordCount] = useState<number | null>(null); // State for word count
+  const [title, setTitle] = useState(''); // State for the page title
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false); // State to manage loading
   const [spinnerImage, setSpinnerImage] = useState('/images/robot-2.gif');
@@ -28,6 +29,7 @@ export default function AnalysisForm() {
     setSeoScore(null);  // Clear previous SEO score
     setSuggestions('');  // Clear previous suggestions
     setWordCount(null);  // Clear previous word count
+    setTitle('');  // Clear previous title
     setSpinnerImage(selectRandomSpinnerImage()); // Select a random spinner image
     setLoading(true); // Set loading state to true
 
@@ -55,6 +57,7 @@ export default function AnalysisForm() {
       setSeoScore(data.seoScore); // Set SEO score from the response
       setSuggestions(data.suggestions); // Set suggestions from the response
       setWordCount(data.wordCount); // Set word count from the response
+      setTitle(data.title); // Set title from the response
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -64,7 +67,7 @@ export default function AnalysisForm() {
 
   const getRatingBackgroundColor = (rating: number | null) => {
     if (rating === null) return 'bg-white';
-    if (rating >= 9) return 'bg-green-200';
+    if (rating === 10) return 'bg-green-200';
     if (rating >= 7) return 'bg-orange-200';
     return 'bg-red-200';
   };
@@ -73,6 +76,7 @@ export default function AnalysisForm() {
     if (wordCount === null) return 'bg-white';
     return wordCount >= 300 ? 'bg-green-200' : 'bg-red-200';
   };
+
 
   return (
     <div className="bg-white min-h-screen p-4 mx-auto max-w-7xl">
@@ -159,6 +163,12 @@ export default function AnalysisForm() {
             )}
             {analysis && (
               <div className="mt-2 p-4 border rounded-md bg-gray-50 whitespace-pre-line">
+                {title && (
+                  <div className="mb-4">
+                    <h2 className="text-xl font-semibold mb-2">Titel der Seite</h2>
+                    <p>«{title}»</p>
+                  </div>
+                )}
                 <h2 className="text-xl font-semibold mb-2">Analyseergebnis</h2>
                 <p>{analysis}</p>
               </div>

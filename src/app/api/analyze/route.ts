@@ -23,16 +23,14 @@ export async function POST(req: NextRequest) {
     const webpageResponse = await axios.get(url);
     const webpageHTML = webpageResponse.data;
 
-    // Parse the HTML and extract the main content
+    // Parse the HTML and extract the main content and the title
     const $ = cheerio.load(webpageHTML);
     const mainContent = $('.default').text();
+    const pageTitle = $('title').text();
 
     // Truncate the text if it's too long (optional, based on your needs)
     const maxLength = 5000;
     const truncatedContent = mainContent.length > maxLength ? mainContent.slice(0, maxLength) : mainContent;
-
-    // Count the number of words
-    const wordCount = truncatedContent.split(/\s+/).length;
 
     // Prepare the data for OpenAI API
     const data = {
@@ -49,7 +47,7 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    // Send the request to OpenAI API...
+    // Send the request to OpenAI API
     const openaiResponse = await axios.post<OpenAIResponse>(
       'https://api.openai.com/v1/chat/completions',
       data,
@@ -80,7 +78,7 @@ export async function POST(req: NextRequest) {
     const suggestionsStart = analysis.indexOf("Vorschläge:");
     const suggestions = suggestionsStart !== -1 ? analysis.slice(suggestionsStart) : "";
 
-    return NextResponse.json({ analysis, rating: ratingValue, seoScore, suggestions, wordCount });
+    return NextResponse.json({ analysis, rating: ratingValue, seoScore, suggestions, wordCount: truncatedContent.split(/\s+/).length, title: pageTitle });
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error(error.response?.data || error.message);
