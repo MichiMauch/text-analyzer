@@ -34,8 +34,8 @@ export default function AnalysisForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [spinnerImage, setSpinnerImage] = useState('/images/robot-2.gif');
-  const [sentimentScore, setSentimentScore] = useState<number | null>(null);
-  const [comparativeScore, setComparativeScore] = useState<number | null>(null);
+  //const [sentimentScore, setSentimentScore] = useState<number | null>(null);
+  //const [comparativeScore, setComparativeScore] = useState<number | null>(null);
   const [newSentimentScore, setNewSentimentScore] = useState<string | null>(null);
 
   const selectRandomSpinnerImage = () => {
@@ -53,8 +53,8 @@ export default function AnalysisForm() {
     setTitle('');
     setOgImage('');
     setExtractedText('');
-    setSentimentScore(null);
-    setComparativeScore(null);
+    //setSentimentScore(null);
+    //setComparativeScore(null);
     setNewSentimentScore(null);
     setSpinnerImage(selectRandomSpinnerImage());
     setLoading(true);
@@ -81,8 +81,8 @@ export default function AnalysisForm() {
       setTitle(data.title);
       setOgImage(data.ogImage);
       setExtractedText(data.truncatedContent);
-      setSentimentScore(data.sentimentScore);
-      setComparativeScore(data.comparativeScore);
+      //setSentimentScore(data.sentimentScore);
+      //setComparativeScore(data.comparativeScore);
       setNewSentimentScore(data.sentimentAnalysis); // Setze den neuen Sentiment-Score
 
     } catch (error: any) {
@@ -114,18 +114,18 @@ export default function AnalysisForm() {
           </div>
         ) : (
           <Analysis
-            title={title}
-            ogImage={ogImage}
-            rating={rating}
-            seoScore={seoScore}
-            wordCount={wordCount}
-            analysis={analysis}
-            suggestions={suggestions}
-            extractedText={extractedText}
-            sentimentScore={sentimentScore}
-            comparativeScore={comparativeScore}
-            newSentimentScore={newSentimentScore} // Übergib den neuen Sentiment-Score
-          />
+                title={title}
+                ogImage={ogImage}
+                rating={rating}
+                seoScore={seoScore}
+                wordCount={wordCount}
+                analysis={analysis}
+                suggestions={suggestions}
+                extractedText={extractedText}
+                // sentimentScore={sentimentScore}
+                // comparativeScore={comparativeScore}
+                newSentimentScore={newSentimentScore} // Übergib den neuen Sentiment-Score
+                sentimentScore={null} comparativeScore={null}          />
         )}
         {error && (
           <div className="mt-4 text-red-500">

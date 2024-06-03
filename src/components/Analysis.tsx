@@ -87,7 +87,7 @@ const Analysis: React.FC<AnalysisProps> = ({
     )}
     {newSentimentScore !== null && (
       <div className={`mt-4 text-xl font-bold ${getSentimentBackgroundColor(Number(newSentimentScore))} p-4 rounded-md`}>
-        Sentiment Score: {newSentimentScore} - {getSentimentDescription(Number(newSentimentScore))}
+        Sentiment Score: {Number(newSentimentScore).toFixed(2)} - {getSentimentDescription(Number(newSentimentScore))}
       </div>
     )}
     {wordCount !== null && (
@@ -98,18 +98,6 @@ const Analysis: React.FC<AnalysisProps> = ({
         )}
       </div>
     )}
-     
-    {sentimentScore !== null && (
-      <div className={`mt-4 text-xl font-bold bg-blue-200 p-4 rounded-md`}>
-        (Sentiment Score: {sentimentScore.toFixed(2)})
-      </div>
-    )}
-    {comparativeScore !== null && (
-      <div className={`mt-4 text-xl font-bold bg-blue-100 p-4 rounded-md`}>
-        (Comparative Score: {comparativeScore.toFixed(2)})
-      </div>
-    )}
-   
     {analysis && (
       <div className="mt-2 p-4 border rounded-md bg-gray-50 whitespace-pre-line">
         <h2 className="text-xl font-semibold mb-2">Analyseergebnis</h2>

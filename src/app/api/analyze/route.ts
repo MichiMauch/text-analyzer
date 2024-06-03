@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import cheerio from 'cheerio';
-import Sentiment from 'sentiment';
+// import Sentiment from 'sentiment';
 import { OPENAI_API_KEY } from './config';
 import { extractVisibleText, getMainContent } from './utils';
 
@@ -9,7 +9,7 @@ interface OpenAIResponse {
   choices: { message: { content: string } }[];
 }
 
-const sentiment = new Sentiment();
+//const sentiment = new Sentiment();
 
 export async function POST(req: NextRequest) {
   if (!OPENAI_API_KEY) {
@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
     const maxLength = 5000;
     const truncatedContent = mainContent.length > maxLength ? mainContent.slice(0, maxLength) : mainContent;
 
-    const sentimentResult = sentiment.analyze(mainContent);
+    /*const sentimentResult = sentiment.analyze(mainContent);
     console.log('Sentiment Score:', sentimentResult.score);
-    console.log('Comparative Score:', sentimentResult.comparative);
+    console.log('Comparative Score:', sentimentResult.comparative);*/
 
     const sentimentData = {
       model: 'gpt-3.5-turbo',
@@ -172,8 +172,8 @@ export async function POST(req: NextRequest) {
       title: pageTitle,
       ogImage,
       truncatedContent,
-      sentimentScore: sentimentResult.score,
-      comparativeScore: sentimentResult.comparative,
+      //sentimentScore: sentimentResult.score,
+      //comparativeScore: sentimentResult.comparative,
       sentimentAnalysis
     });
 
