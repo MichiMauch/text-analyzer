@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import cheerio from 'cheerio';
+import Sentiment from 'sentiment';
 import { OPENAI_API_KEY } from './config';
 import { extractVisibleText, getMainContent } from './utils';
 
 interface OpenAIResponse {
   choices: { message: { content: string } }[];
 }
+
+const sentiment = new Sentiment();
 
 export async function POST(req: NextRequest) {
   if (!OPENAI_API_KEY) {
@@ -30,10 +33,42 @@ export async function POST(req: NextRequest) {
     const maxLength = 5000;
     const truncatedContent = mainContent.length > maxLength ? mainContent.slice(0, maxLength) : mainContent;
 
-    // Erste Abfrage: Qualitative Analyse und Verbesserungsvorschläge
+    const sentimentResult = sentiment.analyze(mainContent);
+    console.log('Sentiment Score:', sentimentResult.score);
+    console.log('Comparative Score:', sentimentResult.comparative);
+
+    const sentimentData = {
+      model: 'gpt-3.5-turbo',
+      temperature: 0.5,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful assistant. Provide consistent and objective analysis.',
+        },
+        {
+          role: 'user',
+          content: `Bewerte den Sentiment des Textes auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet. Gib nur eine Zahl als Antwort zurück, ohne jegliche zusätzliche Erklärung oder Kommentare: "${truncatedContent}".`
+        },
+      ],
+    };
+
+    const sentimentResponse = await axios.post<OpenAIResponse>(
+      'https://api.openai.com/v1/chat/completions',
+      sentimentData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    const sentimentAnalysis = sentimentResponse.data.choices[0].message.content.trim();
+    console.log('Sentiment Analysis:', sentimentAnalysis);
+
     const data1 = {
       model: 'gpt-3.5-turbo',
-      temperature: 0.2, // Setze die Temperatur für deterministischere Antworten
+      temperature: 0.2, 
       messages: [
         {
           role: 'system',
@@ -60,20 +95,15 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    if (!qualitativeResponse.data || !qualitativeResponse.data.choices || qualitativeResponse.data.choices.length === 0) {
-      throw new Error('Invalid response from OpenAI API');
-    }
-
     const qualitativeAnalysis = qualitativeResponse.data.choices[0].message.content.trim();
     console.log('Qualitative Analysis:', qualitativeAnalysis);
 
     const suggestionsStart = qualitativeAnalysis.indexOf("Verbesserungsvorschläge:");
     const suggestions = suggestionsStart !== -1 ? qualitativeAnalysis.slice(suggestionsStart) : "";
 
-    // Zweite Abfrage: Numerische Bewertung der Lesbarkeit
     const data2 = {
       model: 'gpt-3.5-turbo',
-      temperature: 0.2, // Setze die Temperatur für deterministischere Antworten
+      temperature: 0.2, 
       messages: [
         {
           role: 'system',
@@ -97,19 +127,14 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    if (!readabilityResponse.data || !readabilityResponse.data.choices || readabilityResponse.data.choices.length === 0) {
-      throw new Error('Invalid response from OpenAI API');
-    }
-
     const readabilityAnalysis = readabilityResponse.data.choices[0].message.content.trim();
     console.log('Readability Analysis:', readabilityAnalysis);
     const readabilityMatch = readabilityAnalysis.match(/(\d+)/);
     const ratingValue = readabilityMatch ? parseInt(readabilityMatch[1], 10) : null;
 
-    // Dritte Abfrage: Numerische Bewertung der SEO-Optimierung
     const data3 = {
       model: 'gpt-3.5-turbo',
-      temperature: 0.2, // Setze die Temperatur für deterministischere Antworten
+      temperature: 0.2, 
       messages: [
         {
           role: 'system',
@@ -133,10 +158,6 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    if (!seoResponse.data || !seoResponse.data.choices || seoResponse.data.choices.length === 0) {
-      throw new Error('Invalid response from OpenAI API');
-    }
-
     const seoAnalysis = seoResponse.data.choices[0].message.content.trim();
     console.log('SEO Analysis:', seoAnalysis);
     const seoMatch = seoAnalysis.match(/(\d+)/);
@@ -151,6 +172,9 @@ export async function POST(req: NextRequest) {
       title: pageTitle,
       ogImage,
       truncatedContent,
+      sentimentScore: sentimentResult.score,
+      comparativeScore: sentimentResult.comparative,
+      sentimentAnalysis
     });
 
   } catch (error: unknown) {

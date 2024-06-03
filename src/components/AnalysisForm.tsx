@@ -1,10 +1,24 @@
 'use client';
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Form from './Form';
 import Loading from './Loading';
 import Analysis from './Analysis';
 import Image from 'next/image';
+
+// Typdefinitionen für die API-Antworten
+interface AnalysisResponse {
+  analysis: string;
+  rating: number | null;
+  seoScore: number | null;
+  suggestions: string;
+  wordCount: number | null;
+  title: string;
+  ogImage: string;
+  truncatedContent: string;
+  sentimentScore: number | null;
+  comparativeScore: number | null;
+  sentimentAnalysis: string | null; // Füge diese Zeile hinzu
+}
 
 export default function AnalysisForm() {
   const [url, setUrl] = useState('');
@@ -20,6 +34,9 @@ export default function AnalysisForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [spinnerImage, setSpinnerImage] = useState('/images/robot-2.gif');
+  const [sentimentScore, setSentimentScore] = useState<number | null>(null);
+  const [comparativeScore, setComparativeScore] = useState<number | null>(null);
+  const [newSentimentScore, setNewSentimentScore] = useState<string | null>(null);
 
   const selectRandomSpinnerImage = () => {
     const images = ['/images/robot-2.gif', '/images/robot-3.gif'];
@@ -36,11 +53,14 @@ export default function AnalysisForm() {
     setTitle('');
     setOgImage('');
     setExtractedText('');
+    setSentimentScore(null);
+    setComparativeScore(null);
+    setNewSentimentScore(null);
     setSpinnerImage(selectRandomSpinnerImage());
     setLoading(true);
 
     try {
-      const response = await fetch('/api/analyze', {
+      const analysisResponse = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,33 +68,23 @@ export default function AnalysisForm() {
         body: JSON.stringify({ url, keyphrase }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Unknown error occurred');
+      if (!analysisResponse.ok) {
+        throw new Error('Failed to fetch analysis');
       }
 
-      const data = await response.json();
-      console.log('API Response:', data); // Konsolenausgabe der gesamten API-Antwort
-
-      const analysisText = data.analysis;
-      console.log('Analysis Text:', analysisText); // Konsolenausgabe des Analysis-Textes
-
-      const ratingValue = data.rating;
-      console.log('Extracted Rating Value:', ratingValue); // Konsolenausgabe des extrahierten Rating-Werts
-
-      const seoScoreValue = data.seoScore;
-      console.log('Extracted SEO Score Value:', seoScoreValue); // Konsolenausgabe des extrahierten SEO-Score-Werts
-
-      console.log('ogImage:', data.ogImage); // Log the ogImage URL to the console
-
-      setAnalysis(analysisText);
-      setRating(ratingValue);
-      setSeoScore(seoScoreValue);
+      const data: AnalysisResponse = await analysisResponse.json();
+      setAnalysis(data.analysis);
+      setRating(data.rating);
+      setSeoScore(data.seoScore);
       setSuggestions(data.suggestions);
       setWordCount(data.wordCount);
       setTitle(data.title);
       setOgImage(data.ogImage);
       setExtractedText(data.truncatedContent);
+      setSentimentScore(data.sentimentScore);
+      setComparativeScore(data.comparativeScore);
+      setNewSentimentScore(data.sentimentAnalysis); // Setze den neuen Sentiment-Score
+
     } catch (error: any) {
       setError(error.message);
     } finally {
@@ -85,7 +95,6 @@ export default function AnalysisForm() {
   return (
     <div className="bg-white min-h-screen flex flex-col justify-center p-4 mx-auto max-w-7xl">
       <Form onSubmit={handleSubmit} loading={loading} />
-
       <div className="border bg-background rounded-xl my-4 p-4 flex flex-col items-center justify-center w-full max-w-7xl flex-grow">
         {loading ? (
           <Loading spinnerImage={spinnerImage} />
@@ -113,6 +122,9 @@ export default function AnalysisForm() {
             analysis={analysis}
             suggestions={suggestions}
             extractedText={extractedText}
+            sentimentScore={sentimentScore}
+            comparativeScore={comparativeScore}
+            newSentimentScore={newSentimentScore} // Übergib den neuen Sentiment-Score
           />
         )}
         {error && (
