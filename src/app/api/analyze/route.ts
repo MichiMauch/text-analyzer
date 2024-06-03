@@ -33,10 +33,6 @@ export async function POST(req: NextRequest) {
     const maxLength = 5000;
     const truncatedContent = mainContent.length > maxLength ? mainContent.slice(0, maxLength) : mainContent;
 
-    /*const sentimentResult = sentiment.analyze(mainContent);
-    console.log('Sentiment Score:', sentimentResult.score);
-    console.log('Comparative Score:', sentimentResult.comparative);*/
-
     const sentimentData = {
       model: 'gpt-3.5-turbo',
       temperature: 0.5,
@@ -51,20 +47,6 @@ export async function POST(req: NextRequest) {
         },
       ],
     };
-
-    const sentimentResponse = await axios.post<OpenAIResponse>(
-      'https://api.openai.com/v1/chat/completions',
-      sentimentData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-      }
-    );
-
-    const sentimentAnalysis = sentimentResponse.data.choices[0].message.content.trim();
-    console.log('Sentiment Analysis:', sentimentAnalysis);
 
     const data1 = {
       model: 'gpt-3.5-turbo',
@@ -84,23 +66,6 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    const qualitativeResponse = await axios.post<OpenAIResponse>(
-      'https://api.openai.com/v1/chat/completions',
-      data1,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-      }
-    );
-
-    const qualitativeAnalysis = qualitativeResponse.data.choices[0].message.content.trim();
-    console.log('Qualitative Analysis:', qualitativeAnalysis);
-
-    const suggestionsStart = qualitativeAnalysis.indexOf("Verbesserungsvorschläge:");
-    const suggestions = suggestionsStart !== -1 ? qualitativeAnalysis.slice(suggestionsStart) : "";
-
     const data2 = {
       model: 'gpt-3.5-turbo',
       temperature: 0.2, 
@@ -115,22 +80,6 @@ export async function POST(req: NextRequest) {
         },
       ],
     };
-
-    const readabilityResponse = await axios.post<OpenAIResponse>(
-      'https://api.openai.com/v1/chat/completions',
-      data2,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-      }
-    );
-
-    const readabilityAnalysis = readabilityResponse.data.choices[0].message.content.trim();
-    console.log('Readability Analysis:', readabilityAnalysis);
-    const readabilityMatch = readabilityAnalysis.match(/(\d+)/);
-    const ratingValue = readabilityMatch ? parseInt(readabilityMatch[1], 10) : null;
 
     const data3 = {
       model: 'gpt-3.5-turbo',
@@ -147,16 +96,61 @@ export async function POST(req: NextRequest) {
       ],
     };
 
-    const seoResponse = await axios.post<OpenAIResponse>(
-      'https://api.openai.com/v1/chat/completions',
-      data3,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-      }
-    );
+    const [sentimentResponse, qualitativeResponse, readabilityResponse, seoResponse] = await Promise.all([
+      axios.post<OpenAIResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        sentimentData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+        }
+      ),
+      axios.post<OpenAIResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        data1,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+        }
+      ),
+      axios.post<OpenAIResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        data2,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+        }
+      ),
+      axios.post<OpenAIResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        data3,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+        }
+      ),
+    ]);
+
+    const sentimentAnalysis = sentimentResponse.data.choices[0].message.content.trim();
+    console.log('Sentiment Analysis:', sentimentAnalysis);
+
+    const qualitativeAnalysis = qualitativeResponse.data.choices[0].message.content.trim();
+    console.log('Qualitative Analysis:', qualitativeAnalysis);
+    const suggestionsStart = qualitativeAnalysis.indexOf("Verbesserungsvorschläge:");
+    const suggestions = suggestionsStart !== -1 ? qualitativeAnalysis.slice(suggestionsStart) : "";
+
+    const readabilityAnalysis = readabilityResponse.data.choices[0].message.content.trim();
+    console.log('Readability Analysis:', readabilityAnalysis);
+    const readabilityMatch = readabilityAnalysis.match(/(\d+)/);
+    const ratingValue = readabilityMatch ? parseInt(readabilityMatch[1], 10) : null;
 
     const seoAnalysis = seoResponse.data.choices[0].message.content.trim();
     console.log('SEO Analysis:', seoAnalysis);
