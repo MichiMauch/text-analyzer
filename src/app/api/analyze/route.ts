@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const truncatedContent = mainContent.length > maxLength ? mainContent.slice(0, maxLength) : mainContent;
 
     const sentimentData = {
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.5,
       messages: [
         {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     };
 
     const data1 = {
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.2, 
       messages: [
         {
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     };
 
     const data2 = {
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.2, 
       messages: [
         {
@@ -76,13 +76,13 @@ export async function POST(req: NextRequest) {
         },
         {
           role: 'user',
-          content: `Bitte bewerten Sie die allgemeine Lesbarkeit des folgenden Textes auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet: ${truncatedContent}`,
+          content: `Bitte bewerten Sie die allgemeine Lesbarkeit des folgenden Textes auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet. Gib nur eine Zahl als Antwort zurück, ohne jegliche zusätzliche Erklärung oder Kommentare: ${truncatedContent}`,
         },
       ],
     };
 
     const data3 = {
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.2, 
       messages: [
         {
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         },
         {
           role: 'user',
-          content: `Bitte bewerten Sie die SEO-Optimierung des folgenden Textes auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet, basierend auf der Verwendung der Keyphrase "${keyphrase}": ${truncatedContent}`,
+          content: `Bitte bewerten Sie die SEO-Optimierung des folgenden Textes auf einer Skala von 1 bis 10, wobei 1 sehr schlecht und 10 ausgezeichnet bedeutet, gib nur eine Zahl als Antwort zurück, ohne jegliche zusätzliche Erklärung oder Kommentare, basierend auf der Verwendung der Keyphrase "${keyphrase}": ${truncatedContent}`,
         },
       ],
     };
